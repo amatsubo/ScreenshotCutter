@@ -156,3 +156,8 @@ MIT License です。詳細は [LICENSE](LICENSE) を参照してください。
 同梱のサードパーティ製コンポーネント（.NET ランタイム・CommunityToolkit.Mvvm）については
 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt) を参照してください。
 **再配布する場合はこのファイルも一緒に配布してください。**
+
+---
+
+## 連絡先
+不具合や追加要望等あれば「`https://x.com/04vani20`」までどうぞ
