@@ -1,0 +1,117 @@
+<Window x:Class="ScreenshotCutter.Views.CropOverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="切り出し領域の設定"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Topmost="True"
+        AllowsTransparency="False"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        WindowStartupLocation="Manual"
+        SizeToContent="Manual"
+        Background="Black"
+        Focusable="True">
+
+    <!--
+        対象モニター全面を等倍（1 物理ピクセル = 1 画像ピクセル）で覆う
+        （確定仕様書 4.6.3）。
+        ScaleRoot に 1/DPI倍率 の LayoutTransform を掛けることで、
+        内側の Canvas を物理ピクセル単位の座標系として扱える。
+    -->
+    <Grid x:Name="ScaleRoot">
+        <Grid.LayoutTransform>
+            <ScaleTransform x:Name="RootScale" ScaleX="1" ScaleY="1" />
+        </Grid.LayoutTransform>
+
+        <Canvas x:Name="RootCanvas" Background="Black" ClipToBounds="True">
+
+            <!-- 撮影済みの静止画。ライブ更新はしない -->
+            <Image x:Name="BackgroundImage"
+                   Canvas.Left="0"
+                   Canvas.Top="0"
+                   Stretch="None"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
+
+            <!-- 切り出し範囲の外側を暗く覆う（EvenOdd で内側だけ抜く） -->
+            <Path x:Name="DimPath" Fill="#8C000000" IsHitTestVisible="False" />
+
+            <!-- 画面端まで伸びるガイド線 -->
+            <Line x:Name="GuideTop" Stroke="#FFFF2D2D" StrokeThickness="1" Opacity="0.75" IsHitTestVisible="False" />
+            <Line x:Name="GuideBottom" Stroke="#FFFF2D2D" StrokeThickness="1" Opacity="0.75" IsHitTestVisible="False" />
+            <Line x:Name="GuideLeft" Stroke="#FFFF2D2D" StrokeThickness="1" Opacity="0.75" IsHitTestVisible="False" />
+            <Line x:Name="GuideRight" Stroke="#FFFF2D2D" StrokeThickness="1" Opacity="0.75" IsHitTestVisible="False" />
+
+            <!-- 切り出し枠 -->
+            <Rectangle x:Name="CropBorder"
+                       Stroke="#FFFF2D2D"
+                       StrokeThickness="2"
+                       IsHitTestVisible="False" />
+
+            <!-- 8 方向のリサイズハンドル（コードで生成） -->
+            <Canvas x:Name="HandleLayer" IsHitTestVisible="False" />
+
+            <!-- 数値入力パネル（確定仕様書 4.6.3.5） -->
+            <Border x:Name="NumericPanel"
+                    Background="#F2202020"
+                    BorderBrush="#FF4A4A4A"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="14,12">
+                <StackPanel>
+                    <TextBlock Text="切り出し領域"
+                               Foreground="#FFFFFFFF"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="76" />
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="76" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="6" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="X" Foreground="#FFD0D0D0"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox x:Name="XBox" Grid.Row="0" Grid.Column="1" Tag="X" />
+
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="幅" Foreground="#FFD0D0D0"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox x:Name="WidthBox" Grid.Row="0" Grid.Column="4" Tag="W" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Y" Foreground="#FFD0D0D0"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox x:Name="YBox" Grid.Row="2" Grid.Column="1" Tag="Y" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="3" Text="高さ" Foreground="#FFD0D0D0"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox x:Name="HeightBox" Grid.Row="2" Grid.Column="4" Tag="H" />
+                    </Grid>
+
+                    <TextBlock x:Name="HintText"
+                               Foreground="#FF9A9A9A"
+                               FontSize="11"
+                               Margin="0,12,0,0"
+                               TextWrapping="Wrap"
+                               MaxWidth="280"
+                               Text="ドラッグで枠を作成 / 枠内をドラッグで移動 / ハンドルでサイズ変更&#x0a;矢印キー: 1px 移動、Shift+矢印: 1px サイズ変更&#x0a;Enter: 確定、Esc: 取り消し" />
+
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button x:Name="ConfirmButton" Content="確定 (Enter)" MinWidth="104" Margin="0,0,8,0" />
+                        <Button x:Name="CancelButton" Content="取り消し (Esc)" MinWidth="104" Margin="0,0,8,0" />
+                        <Button x:Name="RecaptureButton" Content="再取得" MinWidth="76" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </Canvas>
+    </Grid>
+</Window>

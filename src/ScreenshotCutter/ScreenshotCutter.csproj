@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <RootNamespace>ScreenshotCutter</RootNamespace>
+    <AssemblyName>ScreenshotCutter</AssemblyName>
+    <Product>ScreenshotCutter</Product>
+    <AssemblyTitle>ScreenshotCutter</AssemblyTitle>
+    <Version>1.0.0</Version>
+
+    <!-- Windows 11 x64 のみをサポート対象とする（確定仕様書 2章） -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Platforms>x64</Platforms>
+
+    <!-- 開発ビルドは framework-dependent で高速に。self-contained 化は
+         Properties/PublishProfiles/win-x64.pubxml（発行時）で行う。 -->
+    <SelfContained>false</SelfContained>
+
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- 常駐アプリのため、不要なサテライトリソースを同梱しない -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+
+    <!-- 常駐アプリのためフットプリントを優先する（確定仕様書 6章）。
+         サーバー GC はヒープをコア数分確保するため無効。
+         バックグラウンド GC もスレッドと予約メモリを増やすので無効にする。 -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
+
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ScreenshotCutter.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 配布物にライセンス表記を同梱する。Update ではプロジェクト外の
+         ファイルを拾えないため Include で明示的に追加する。 -->
+    <None Include="..\..\THIRD-PARTY-NOTICES.txt" Link="THIRD-PARTY-NOTICES.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

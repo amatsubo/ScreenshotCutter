@@ -1,0 +1,253 @@
+<Window x:Class="ScreenshotCutter.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:ScreenshotCutter.ViewModels"
+        d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="ScreenshotCutter の設定"
+        Width="720"
+        Height="760"
+        MinWidth="640"
+        MinHeight="560"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+
+    <Window.Resources>
+        <Style x:Key="SectionBoxStyle" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,14" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLight}" />
+            <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
+        </Style>
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,10,0" />
+        </Style>
+        <Style x:Key="RowMarginStyle" TargetType="FrameworkElement">
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel LastChildFill="True">
+
+        <!-- 確定操作は OK / キャンセル / 適用（確定仕様書 4.3.3） -->
+        <Border DockPanel.Dock="Bottom"
+                Background="{StaticResource WindowBackgroundBrush}"
+                BorderBrush="{StaticResource BorderBrushLight}"
+                BorderThickness="0,1,0,0"
+                Padding="16,12">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="OkButton" Content="OK" IsDefault="True" Margin="0,0,8,0" />
+                <Button x:Name="CancelButton" Content="キャンセル" IsCancel="True" Margin="0,0,8,0" />
+                <Button x:Name="ApplyButton" Content="適用" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16,16,16,0">
+            <StackPanel>
+
+                <!-- ============================== 撮影 ============================== -->
+                <GroupBox Header="撮影" Style="{StaticResource SectionBoxStyle}">
+                    <StackPanel>
+                        <TextBlock Text="撮影対象のモニター" Style="{StaticResource SectionHeaderStyle}" />
+
+                        <ListBox x:Name="MonitorList"
+                                 ItemsSource="{Binding Monitors}"
+                                 SelectedItem="{Binding SelectedMonitor, Mode=TwoWay}"
+                                 DisplayMemberPath="DisplayLabel"
+                                 Height="108"
+                                 Margin="0,0,0,8" />
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <Button x:Name="IdentifyButton" Content="識別" MinWidth="76" Margin="0,0,8,0"
+                                    ToolTip="各モニターの中央に番号を表示します。" />
+                            <Button x:Name="RefreshMonitorsButton" Content="一覧を更新" MinWidth="96" />
+                        </StackPanel>
+
+                        <Separator Margin="0,0,0,12" />
+
+                        <CheckBox x:Name="CropEnabledCheck"
+                                  Content="切り出しを有効にする"
+                                  IsChecked="{Binding CropEnabled, Mode=TwoWay}"
+                                  Margin="0,0,0,6" />
+
+                        <TextBlock Text="オフにすると、モニター全体をそのまま保存します。"
+                                   Style="{StaticResource HintTextStyle}"
+                                   Margin="0,0,0,10" />
+
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Background="{StaticResource ControlBackgroundBrush}"
+                                    BorderBrush="{StaticResource BorderBrushLight}"
+                                    BorderThickness="1"
+                                    Padding="10,7"
+                                    Margin="0,0,8,0">
+                                <TextBlock Text="{Binding CropSummary}" VerticalAlignment="Center" />
+                            </Border>
+
+                            <Button x:Name="ConfigureCropButton"
+                                    Grid.Column="1"
+                                    Content="切り出し領域を設定..."
+                                    MinWidth="150" />
+                        </Grid>
+
+                        <TextBlock Text="対象モニター全体に等倍のオーバーレイを表示し、その上で赤枠を調整します。"
+                                   Style="{StaticResource HintTextStyle}"
+                                   Margin="0,8,0,0" />
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- ============================== 保存 ============================== -->
+                <GroupBox Header="保存" Style="{StaticResource SectionBoxStyle}">
+                    <StackPanel>
+                        <TextBlock Text="保存先フォルダー" Style="{StaticResource SectionHeaderStyle}" />
+
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding OutputFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,8,0" />
+                            <Button x:Name="BrowseFolderButton" Grid.Column="1" Content="参照..." MinWidth="88" />
+                        </Grid>
+
+                        <TextBlock Text="ファイル名" Style="{StaticResource SectionHeaderStyle}" />
+
+                        <TextBox Text="{Binding FileNameTemplate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,0,6" />
+
+                        <TextBlock Margin="0,0,0,6">
+                            <Run Text="例: " Foreground="{StaticResource SubtleTextBrush}" />
+                            <Run Text="{Binding FileNamePreview, Mode=OneWay}" FontWeight="SemiBold" />
+                        </TextBlock>
+
+                        <TextBlock Text="{Binding FileNameWarning}"
+                                   Style="{StaticResource WarningTextStyle}"
+                                   Margin="0,0,0,6">
+                            <TextBlock.Visibility>
+                                <Binding Path="HasFileNameWarning">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter />
+                                    </Binding.Converter>
+                                </Binding>
+                            </TextBlock.Visibility>
+                        </TextBlock>
+
+                        <Expander Header="使えるトークン" Margin="0,4,0,12">
+                            <TextBlock Style="{StaticResource HintTextStyle}" Margin="4,8,0,0">
+                                <Run Text="{}{ } の中には .NET の日付書式を書けます。撮影日時で置き換えられます。" /><LineBreak />
+                                <LineBreak />
+                                <Run Text="{}{yyyy}" FontWeight="SemiBold" /><Run Text=" … 西暦4桁 (2026)" /><LineBreak />
+                                <Run Text="{}{MM}" FontWeight="SemiBold" /><Run Text=" … 月2桁 (08)　" />
+                                <Run Text="{}{dd}" FontWeight="SemiBold" /><Run Text=" … 日2桁 (25)" /><LineBreak />
+                                <Run Text="{}{HH}" FontWeight="SemiBold" /><Run Text=" … 時2桁 (14)　" />
+                                <Run Text="{}{mm}" FontWeight="SemiBold" /><Run Text=" … 分2桁 (30)　" />
+                                <Run Text="{}{ss}" FontWeight="SemiBold" /><Run Text=" … 秒2桁 (52)" /><LineBreak />
+                                <Run Text="{}{yyyyMMdd}" FontWeight="SemiBold" /><Run Text=" … まとめて書くこともできます (20260825)" /><LineBreak />
+                                <LineBreak />
+                                <Run Text="{}{seq}" FontWeight="SemiBold" /><Run Text=" … 連番 (1, 2, 3...)" /><LineBreak />
+                                <Run Text="{}{seq:000}" FontWeight="SemiBold" /><Run Text=" … 桁数を揃えた連番 (001, 002...)" /><LineBreak />
+                                <LineBreak />
+                                <Run Text="{}{seq} を書かない場合、同名のファイルがあると末尾に _001 から連番が付きます。" /><LineBreak />
+                                <Run Text="拡張子 .png は自動で付きます。ファイル名に使えない文字は _ に置き換えられます。" />
+                            </TextBlock>
+                        </Expander>
+
+                        <CheckBox Content="ファイルに保存する"
+                                  IsChecked="{Binding SaveToFile, Mode=TwoWay}"
+                                  IsEnabled="{Binding CanToggleSaveToFile}"
+                                  Margin="0,0,0,8" />
+
+                        <CheckBox Content="クリップボードにもコピーする"
+                                  IsChecked="{Binding CopyToClipboard, Mode=TwoWay}"
+                                  IsEnabled="{Binding CanToggleClipboard}"
+                                  Margin="0,0,0,6" />
+
+                        <TextBlock Text="撮影しても何も残らなくなるため、両方をオフにはできません。"
+                                   Style="{StaticResource HintTextStyle}" />
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- ============================ ホットキー ============================ -->
+                <GroupBox Header="ホットキー" Style="{StaticResource SectionBoxStyle}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <CheckBox Content="Ctrl" IsChecked="{Binding ModifierCtrl, Mode=TwoWay}" Margin="0,0,16,0" />
+                            <CheckBox Content="Alt" IsChecked="{Binding ModifierAlt, Mode=TwoWay}" Margin="0,0,16,0" />
+                            <CheckBox Content="Shift" IsChecked="{Binding ModifierShift, Mode=TwoWay}" Margin="0,0,16,0" />
+                            <CheckBox Content="Win" IsChecked="{Binding ModifierWin, Mode=TwoWay}" Margin="0,0,24,0" />
+
+                            <TextBlock Text="キー" Style="{StaticResource FieldLabelStyle}" />
+                            <ComboBox ItemsSource="{Binding SelectableKeys}"
+                                      DisplayMemberPath="Display"
+                                      SelectedValuePath="Key"
+                                      SelectedValue="{Binding SelectedKey, Mode=TwoWay}"
+                                      Width="170" />
+                        </StackPanel>
+
+                        <TextBlock Margin="0,0,0,6">
+                            <Run Text="現在の設定: " Foreground="{StaticResource SubtleTextBrush}" />
+                            <Run Text="{Binding HotkeyDisplay, Mode=OneWay}" FontWeight="SemiBold" />
+                        </TextBlock>
+
+                        <TextBlock Text="{Binding HotkeyError}"
+                                   Style="{StaticResource ErrorTextStyle}"
+                                   Margin="0,2,0,0">
+                            <TextBlock.Visibility>
+                                <Binding Path="HasHotkeyError">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter />
+                                    </Binding.Converter>
+                                </Binding>
+                            </TextBlock.Visibility>
+                        </TextBlock>
+
+                        <TextBlock Text="修飾キー（Ctrl / Alt / Shift / Win）を 1 つ以上選んでください。押しっぱなしにしても撮影は 1 回だけ実行されます。"
+                                   Style="{StaticResource HintTextStyle}"
+                                   Margin="0,8,0,0" />
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- ============================== 通知 ============================== -->
+                <GroupBox Header="通知" Style="{StaticResource SectionBoxStyle}">
+                    <StackPanel>
+                        <CheckBox Content="撮影したときに通知を表示する"
+                                  IsChecked="{Binding ToastEnabled, Mode=TwoWay}"
+                                  Margin="0,0,0,8" />
+                        <CheckBox Content="撮影したときにシャッター音を鳴らす"
+                                  IsChecked="{Binding ShutterSoundEnabled, Mode=TwoWay}"
+                                  Margin="0,0,0,6" />
+                        <TextBlock Text="エラーが発生したときは、この設定に関わらず通知を表示します。"
+                                   Style="{StaticResource HintTextStyle}" />
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- ============================== 起動 ============================== -->
+                <GroupBox Header="起動" Style="{StaticResource SectionBoxStyle}">
+                    <StackPanel>
+                        <CheckBox Content="Windows へのログオン時に自動的に起動する"
+                                  IsChecked="{Binding RunAtLogon, Mode=TwoWay}"
+                                  Margin="0,0,0,6" />
+                        <TextBlock Text="オンにすると現在の実行ファイルのパスが登録されます。exe を移動した場合は、次回の起動時に自動で登録し直します。"
+                                   Style="{StaticResource HintTextStyle}" />
+                    </StackPanel>
+                </GroupBox>
+
+                <TextBlock x:Name="SettingsPathText"
+                           Style="{StaticResource HintTextStyle}"
+                           Margin="2,0,0,16" />
+
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>
